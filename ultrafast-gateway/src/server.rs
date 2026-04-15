@@ -100,6 +100,7 @@ use crate::middleware::{
 };
 use crate::plugins::{create_plugin, PluginManager};
 use axum::{
+    http::StatusCode,
     routing::{get, post},
     Router,
 };
@@ -325,7 +326,7 @@ pub async fn create_server(config: Config) -> anyhow::Result<Router> {
                     state.clone(),
                     metrics_middleware,
                 )) // 5. Metrics (only authenticated requests)
-                .layer(TimeoutLayer::new(config.server.timeout)), // 6. Timeout (last)
+                .layer(TimeoutLayer::with_status_code(StatusCode::REQUEST_TIMEOUT, config.server.timeout)), // 6. Timeout (last)
         )
         .with_state(state);
 

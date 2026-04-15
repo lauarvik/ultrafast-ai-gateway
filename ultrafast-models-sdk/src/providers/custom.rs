@@ -136,13 +136,21 @@ impl CustomProvider {
 
     fn format_request(&self, request: &ChatRequest) -> Result<serde_json::Value, ProviderError> {
         match &self.custom_config.request_format {
-            RequestFormat::OpenAI => Ok(json!({
-                "model": self.map_model(&request.model),
-                "messages": request.messages,
-                "temperature": request.temperature,
-                "max_tokens": request.max_tokens,
-                "stream": request.stream,
-            })),
+            RequestFormat::OpenAI => {
+                let mut map = serde_json::Map::new();
+                map.insert("model".to_string(), json!(self.map_model(&request.model)));
+                map.insert("messages".to_string(), json!(request.messages));
+                if let Some(temp) = request.temperature {
+                    map.insert("temperature".to_string(), json!(temp));
+                }
+                if let Some(max_tokens) = request.max_tokens {
+                    map.insert("max_tokens".to_string(), json!(max_tokens));
+                }
+                if let Some(stream) = request.stream {
+                    map.insert("stream".to_string(), json!(stream));
+                }
+                Ok(serde_json::Value::Object(map))
+            }
             RequestFormat::Anthropic => {
                 let messages = request
                     .messages
@@ -160,13 +168,19 @@ impl CustomProvider {
                     })
                     .collect::<Vec<_>>();
 
-                Ok(json!({
-                    "model": self.map_model(&request.model),
-                    "messages": messages,
-                    "temperature": request.temperature,
-                    "max_tokens": request.max_tokens,
-                    "stream": request.stream,
-                }))
+                let mut map = serde_json::Map::new();
+                map.insert("model".to_string(), json!(self.map_model(&request.model)));
+                map.insert("messages".to_string(), json!(messages));
+                if let Some(temp) = request.temperature {
+                    map.insert("temperature".to_string(), json!(temp));
+                }
+                if let Some(max_tokens) = request.max_tokens {
+                    map.insert("max_tokens".to_string(), json!(max_tokens));
+                }
+                if let Some(stream) = request.stream {
+                    map.insert("stream".to_string(), json!(stream));
+                }
+                Ok(serde_json::Value::Object(map))
             }
             RequestFormat::Custom { template } => {
                 // Simple template substitution - in a real implementation, you'd want a proper templating engine

@@ -55,7 +55,7 @@ clap = { version = "4.5", features = ["derive"] }
 # Caching and storage
 dashmap = "5.5"
 lru = "0.12"
-redis = { version = "0.25", features = ["tokio-comp"] }
+redis = { version = "0.29.5", features = ["tokio-comp"] }
 
 # Authentication
 jsonwebtoken = "9.0"
